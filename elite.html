@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en" class="h-full w-full">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verification Poster - Mobile Friendly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind (kept as in original) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KEEP SDK as requested -->
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+
+  <!-- ===========================================================
+       Styles: responsive + mobile-friendly + preserved animations
+       =========================================================== -->
+  <style>
+    /* Reset & base */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* Animations */
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 14px rgba(255,255,255,0.22); }
+      50%     { box-shadow: 0 0 28px rgba(255,255,255,0.44); }
+    }
+
+    .shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+
+    .float-animation { animation: float 3s ease-in-out infinite; }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+    /* Gradient border container */
+    .gradient-border {
+      position: relative;
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+      backdrop-filter: blur(8px);
+      border-radius: 1rem;
+    }
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B6B, #4ECDC4);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    /* Responsive hexagon */
+    .hexagon {
+      width: clamp(56px, 20vw, 110px);
+      height: clamp(64px, 24vw, 130px);
+      position: relative;
+      margin: calc(clamp(20px, 6vw, 48px)) 0;
+    }
+    .hexagon::before, .hexagon::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      border-left: calc(clamp(28px, 9vw, 55px)) solid transparent;
+      border-right: calc(clamp(28px, 9vw, 55px)) solid transparent;
+    }
+    .hexagon::before { bottom: 100%; border-bottom: calc(clamp(16px, 5vw, 34px)) solid currentColor; }
+    .hexagon::after  { top: 100%;    border-top:    calc(clamp(16px, 5vw, 34px)) solid currentColor; }
+    .hexagon-inner { width: 100%; height: 100%; background: currentColor; display:flex; align-items:center; justify-content:center; border-radius: 6px; }
+
+    /* Background blobs - decorative only, kept small on mobile */
+    .bg-blob { position: absolute; filter: blur(28px); opacity: 0.18; transform: translateZ(0); pointer-events: none; }
+
+    /* Avoid horizontal overflow */
+    #poster-container { overflow: hidden; }
+
+    /* Fine tune shadows for small screens */
+    @media (max-width:640px) {
+      .shadow-2xl { box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+    }
+
+    /* Accessibility / tap improvements */
+    .tap-target { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+    /* Utility for visually-hidden (already used) */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+    /* Small adjustments so text wraps nicely on tiny screens */
+    #member-name, #member-id { word-break: break-word; }
+
+    /* ensure the card doesn't get too tall on small screens */
+    .min-h-poster { min-height: 420px; }
+    @media (max-width:420px) { .min-h-poster { min-height: 360px; } }
+
+  </style>
+
+  <!-- allow view transitions where supported -->
+  <style>@view-transition { navigation: auto; }</style>
+</head>
+
+<body class="h-full w-full">
+  <header class="sr-only"><h1>Verification Poster</h1></header>
+
+  <main id="app-root" class="w-full min-h-screen flex items-center justify-center p-4 sm:p-8">
+    <!-- Poster container -->
+    <div id="poster-container" class="w-full h-full max-w-3xl md:max-w-4xl relative overflow-hidden rounded-2xl md:rounded-3xl shadow-2xl p-4 sm:p-6"
+         style="background-color: var(--bg-color,#0A0E27); color: var(--text-color,#FFFFFF);">
+      <!-- Decorative background blobs -->
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div class="bg-blob" style="top:1.5rem; left:1rem; width:10rem; height:10rem; border-radius:9999px; background:var(--primary-accent,#FFD700);"></div>
+        <div class="bg-blob" style="bottom:1.5rem; right:1rem; width:14rem; height:14rem; border-radius:9999px; background:var(--secondary-accent,#4ECDC4);"></div>
+        <div class="bg-blob" style="top:50%; left:50%; transform:translate(-50%,-50%); width:18rem; height:18rem; border-radius:9999px; background:var(--surface-color,#1A1F3A);"></div>
+      </div>
+
+      <!-- subtle grid overlay -->
+      <div class="absolute inset-0 opacity-8" style="background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 46px 46px;"></div>
+
+      <!-- Main content -->
+      <div class="relative flex flex-col items-center justify-between py-6 px-4 sm:py-12 sm:px-8 min-h-poster">
+        <!-- Header with Club Logo -->
+        <section class="text-center w-full space-y-3 sm:space-y-4">
+          <div class="flex justify-center mb-3 sm:mb-6">
+            <div class="relative float-animation tap-target">
+              <div id="logo-hexagon" class="hexagon pulse-glow" style="color: var(--primary-accent,#FFD700);">
+                <div class="hexagon-inner">
+                  <!-- Icon centered inside hexagon -->
+                  <svg class="w-10 h-10 sm:w-12 sm:h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7v10l10 5 10-5V7L12 2z"></path>
+                    <path d="M12 22V12"></path>
+                    <path d="M12 12L2 7"></path>
+                    <path d="M12 12l10-5"></path>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"></circle>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h2 id="club-name" class="font-black tracking-wider uppercase" style="text-shadow: 0 0 18px rgba(255,255,255,0.4); font-size: clamp(18px, 4.2vw, 36px);">ELITE CLUB</h2>
+          <p id="tagline" class="font-light tracking-widest uppercase opacity-90" style="font-size: clamp(10px, 2.2vw, 14px);">Innovation &nbsp; Community &nbsp; Excellence</p>
+        </section>
+
+        <!-- Center verification card -->
+        <section class="flex flex-col items-center w-full mt-2">
+          <div id="verification-card" class="gradient-border rounded-2xl sm:rounded-3xl p-4 sm:p-8 shimmer w-full max-w-xl">
+            <div class="flex flex-col items-center space-y-4 sm:space-y-6">
+              <!-- Verification Icon -->
+              <div class="relative">
+                <div id="icon-glow" class="absolute inset-0 blur-xl opacity-60 rounded-full" style="background: var(--primary-accent,#FFD700);"></div>
+                <div id="verification-icon-bg" class="relative rounded-full p-4 sm:p-6" style="background: var(--primary-accent,#FFD700); color: var(--bg-color,#0A0E27);">
+                  <svg class="w-14 h-14 sm:w-20 sm:h-20" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" fill="none"></circle>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Verification text -->
+              <div class="text-center space-y-1">
+                <h3 id="verification-title" class="font-bold tracking-wide uppercase" style="font-size: clamp(14px, 2.6vw, 20px);">Officially Verified</h3>
+                <p id="verification-subtitle" class="opacity-80 tracking-wide" style="font-size: clamp(11px, 2.0vw, 14px);">Authenticated Member</p>
+              </div>
+
+              <!-- Member details -->
+              <div class="w-full space-y-2 pt-3 border-t border-white/20">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <div class="flex items-center gap-3">
+                    <span class="opacity-70 uppercase tracking-wider" style="font-size: 0.75rem;">Member</span>
+                    <span id="member-name" class="font-semibold tracking-wide" style="font-size: clamp(12px, 2.0vw, 16px);"> - VERIFIED</span>
+                  </div>
+                  <!-- added member-id span as requested -->
+                  <div class="flex items-center gap-2">
+                    <span class="opacity-70 uppercase tracking-wider" style="font-size: 0.65rem;">ID</span>
+                    <span id="member-id" class="font-semibold tracking-wide" style="font-size: clamp(12px, 1.8vw, 14px); color: var(--primary-accent,#FFD700);">ELITE-2025-0000</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div class="flex items-center gap-2 pt-2">
+                <div id="status-dot" class="w-3 h-3 rounded-full pulse-glow" style="background: var(--secondary-accent,#4ECDC4);"></div>
+                <span class="uppercase tracking-widest font-semibold" style="font-size: 0.7rem;">Active Status</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center w-full mt-3 space-y-1 sm:space-y-2">
+          <div class="flex items-center justify-center gap-3 mb-2">
+            <div id="footer-line-left" class="h-px w-12 opacity-30" style="background: var(--text-color,#FFFFFF);"></div>
+            <svg class="w-5 h-5 opacity-60" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <div id="footer-line-right" class="h-px w-12 opacity-30" style="background: var(--text-color,#FFFFFF);"></div>
+          </div>
+          <p id="footer-text" class="uppercase tracking-widest opacity-70" style="font-size: clamp(9px, 1.8vw, 12px);">Established 2025 • Exclusive Access</p>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===========================================================
+       Script: responsive font scaling + apply config + element SDK init
+       - fixes the missing member-id by adding/getting element
+       - uses clamp-style font values for responsive sizing
+       =========================================================== -->
+  <script>
+    /* default config (kept) */
+    const defaultConfig = {
+      background_color: "#0A0E27",
+      surface_color: "#1A1F3A",
+      text_color: "#FFFFFF",
+      primary_accent_color: "#FFD700",
+      secondary_accent_color: "#4ECDC4",
+      font_family: "Montserrat",
+      font_size: 16,
+      club_name: "ELITE CLUB",
+      tagline: "Members Only",
+      verification_title: "Officially Verified",
+      verification_subtitle: "Authenticated Member",
+      member_name: "Verified",
+      member_id: "ELITE-2025-****",
+      footer_text: "Established 2025 • Exclusive Access"
+    };
+
+    /* element references */
+    const appRoot = document.getElementById("app-root");
+    const posterContainer = document.getElementById("poster-container");
+    const logoHexagon = document.getElementById("logo-hexagon");
+    const clubName = document.getElementById("club-name");
+    const tagline = document.getElementById("tagline");
+    const verificationCard = document.getElementById("verification-card");
+    const verificationIconBg = document.getElementById("verification-icon-bg");
+    const iconGlow = document.getElementById("icon-glow");
+    const verificationTitle = document.getElementById("verification-title");
+    const verificationSubtitle = document.getElementById("verification-subtitle");
+    const memberName = document.getElementById("member-name");
+    const memberId = document.getElementById("member-id"); // now exists in DOM
+    const statusDot = document.getElementById("status-dot");
+    const footerText = document.getElementById("footer-text");
+    const footerLineLeft = document.getElementById("footer-line-left");
+    const footerLineRight = document.getElementById("footer-line-right");
+
+    /* background blobs selection (may not exist if structure changes) */
+    const bgBlobs = posterContainer.querySelectorAll('.bg-blob');
+
+    /* Helper to set css custom properties for colors (so css pseudoelements can use them) */
+    function setCSSVarsFromConfig(cfg) {
+      const root = posterContainer;
+      root.style.setProperty('--bg-color', cfg.background_color || defaultConfig.background_color);
+      root.style.setProperty('--surface-color', cfg.surface_color || defaultConfig.surface_color);
+      root.style.setProperty('--text-color', cfg.text_color || defaultConfig.text_color);
+      root.style.setProperty('--primary-accent', cfg.primary_accent_color || defaultConfig.primary_accent_color);
+      root.style.setProperty('--secondary-accent', cfg.secondary_accent_color || defaultConfig.secondary_accent_color);
+    }
+
+    /* Responsive font-size application using clamp fallback calculations */
+    function applyFontSizes(baseSize) {
+      // We'll use CSS clamp via style attributes where appropriate
+      // but also set inline sizes for elements that need direct control.
+      clubName.style.fontSize = `clamp(18px, ${baseSize * 2.2}px, ${baseSize * 3}px)`;
+      tagline.style.fontSize = `clamp(10px, ${baseSize * 0.9}px, ${baseSize * 1.1}px)`;
+      verificationTitle.style.fontSize = `clamp(14px, ${baseSize * 1.1}px, ${baseSize * 1.5}px)`;
+      verificationSubtitle.style.fontSize = `clamp(11px, ${baseSize * 0.85}px, ${baseSize * 0.95}px)`;
+      memberName.style.fontSize = `clamp(12px, ${baseSize * 0.9}px, ${baseSize * 1.0}px)`;
+      memberId.style.fontSize = `clamp(12px, ${baseSize * 0.85}px, ${baseSize * 0.95}px)`;
+      footerText.style.fontSize = `clamp(9px, ${baseSize * 0.6}px, ${baseSize * 0.7}px)`;
+    }
+
+    /* Main UI apply function */
+    function applyConfigToUI(config) {
+      const merged = { ...defaultConfig, ...(config || {}) };
+
+      // colors
+      const bgColor = merged.background_color;
+      const surfaceColor = merged.surface_color;
+      const textColor = merged.text_color;
+      const primaryAccent = merged.primary_accent_color;
+      const secondaryAccent = merged.secondary_accent_color;
+
+      // set CSS vars for use in CSS (so ::before gradient uses them)
+      setCSSVarsFromConfig(merged);
+
+      // element-specific styling
+      document.body.style.backgroundColor = bgColor;
+      appRoot.style.backgroundColor = bgColor;
+      posterContainer.style.backgroundColor = bgColor;
+      posterContainer.style.color = textColor;
+
+      if (bgBlobs.length >= 3) {
+        // color the decorative blobs if present
+        bgBlobs[0].style.background = primaryAccent;
+        bgBlobs[1].style.background = secondaryAccent;
+        bgBlobs[2].style.background = surfaceColor;
+      }
+
+      logoHexagon.style.color = primaryAccent;
+      clubName.style.color = textColor;
+      tagline.style.color = textColor;
+
+      verificationIconBg.style.backgroundColor = primaryAccent;
+      verificationIconBg.style.color = bgColor;
+      iconGlow.style.backgroundColor = primaryAccent;
+
+      verificationTitle.style.color = textColor;
+      verificationSubtitle.style.color = textColor;
+      memberName.style.color = textColor;
+      memberId.style.color = primaryAccent;
+      statusDot.style.backgroundColor = secondaryAccent;
+
+      footerText.style.color = textColor;
+      footerLineLeft.style.backgroundColor = textColor;
+      footerLineRight.style.backgroundColor = textColor;
+
+      // fonts
+      const customFont = merged.font_family || defaultConfig.font_family;
+      const baseStack = "system-ui, -apple-system, sans-serif";
+      const fullStack = `${customFont}, ${baseStack}`;
+      document.body.style.fontFamily = fullStack;
+
+      // base font size controls (we use applyFontSizes)
+      const baseSize = Number(merged.font_size) || defaultConfig.font_size;
+      applyFontSizes(baseSize);
+
+      // text content
+      clubName.textContent = merged.club_name;
+      tagline.textContent = merged.tagline;
+      verificationTitle.textContent = merged.verification_title;
+      verificationSubtitle.textContent = merged.verification_subtitle;
+      memberName.textContent = merged.member_name;
+      memberId.textContent = merged.member_id;
+      footerText.textContent = merged.footer_text;
+    }
+
+    /* Element SDK initialization (kept) */
+    function initElementSdk() {
+      if (!window.elementSdk) {
+        // if sdk isn't present, just apply defaults
+        applyConfigToUI(defaultConfig);
+        return;
+      }
+
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          applyConfigToUI(config);
+        },
+        mapToCapabilities: (config) => {
+          return {
+            recolorables: [
+              {
+                get: () => window.elementSdk.config.background_color || defaultConfig.background_color,
+                set: (value) => window.elementSdk.setConfig({ background_color: value })
+              },
+              {
+                get: () => window.elementSdk.config.surface_color || defaultConfig.surface_color,
+                set: (value) => window.elementSdk.setConfig({ surface_color: value })
+              },
+              {
+                get: () => window.elementSdk.config.text_color || defaultConfig.text_color,
+                set: (value) => window.elementSdk.setConfig({ text_color: value })
+              },
+              {
+                get: () => window.elementSdk.config.primary_accent_color || defaultConfig.primary_accent_color,
+                set: (value) => window.elementSdk.setConfig({ primary_accent_color: value })
+              },
+              {
+                get: () => window.elementSdk.config.secondary_accent_color || defaultConfig.secondary_accent_color,
+                set: (value) => window.elementSdk.setConfig({ secondary_accent_color: value })
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => window.elementSdk.config.font_family || defaultConfig.font_family,
+              set: (value) => window.elementSdk.setConfig({ font_family: value })
+            },
+            fontSizeable: {
+              get: () => window.elementSdk.config.font_size || defaultConfig.font_size,
+              set: (value) => window.elementSdk.setConfig({ font_size: value })
+            }
+          };
+        },
+        mapToEditPanelValues: (config) => {
+          const merged = { ...defaultConfig, ...(config || {}) };
+          return new Map([
+            ["club_name", merged.club_name],
+            ["tagline", merged.tagline],
+            ["verification_title", merged.verification_title],
+            ["verification_subtitle", merged.verification_subtitle],
+            ["member_name", merged.member_name],
+            ["member_id", merged.member_id],
+            ["footer_text", merged.footer_text]
+          ]);
+        }
+      });
+
+      // apply initial sdk config (if present) or fallback to default
+      applyConfigToUI(window.elementSdk.config || defaultConfig);
+    }
+
+    // Run init
+    initElementSdk();
+
+    /* OPTIONAL: Ensure layout reflows nicely on orientation change/resizes */
+    window.addEventListener('resize', () => {
+      // re-apply font sizing with existing config (grab current from elementSdk or default)
+      const cfg = (window.elementSdk && window.elementSdk.config) ? window.elementSdk.config : defaultConfig;
+      applyConfigToUI(cfg);
+    });
+  </script>
+
+  <!-- Cloudflare iframe script (kept from original) -->
+  <script>
+  (function(){
+    function c(){
+      var b=a.contentDocument||a.contentWindow.document;
+      if(b){
+        var d=b.createElement('script');
+        d.innerHTML="window.__CF$cv$params={r:'9a937f2820fb34e9',t:'MTc2NDkzNzIxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+        b.getElementsByTagName('head')[0].appendChild(d);
+      }
+    }
+    if(document.body){
+      var a=document.createElement('iframe');
+      a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';
+      document.body.appendChild(a);
+      if('loading' !== document.readyState) c();
+      else if(window.addEventListener) document.addEventListener('DOMContentLoaded', c);
+      else {
+        var e=document.onreadystatechange||function(){};
+        document.onreadystatechange=function(b){ e(b); 'loading' !== document.readyState && (document.onreadystatechange=e, c()); };
+      }
+    }
+  })();
+  </script>
+</body>
+</html>
